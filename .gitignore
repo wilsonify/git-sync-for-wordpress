@@ -1,0 +1,25 @@
+# WordPress
+wp-config.php
+wp-content/uploads/*
+wp-content/cache/*
+wp-content/backup-db/*
+
+# Plugin specific
+.DS_Store
+*.log
+*.swp
+*.tmp
+*~
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Dependencies
+node_modules/
+vendor/
+
+# Temporary files
+/tmp/
