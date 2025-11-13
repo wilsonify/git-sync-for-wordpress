@@ -81,6 +81,17 @@ class GitSync_Git_Operations {
         
         $username = get_option( 'gitsync_username', '' );
         $token = get_option( 'gitsync_token', '' );
+
+        // Validate repo URL and branch to reduce injection attack surface
+        if ( ! $this->validate_repo_url( $repo_url ) ) {
+            $this->log_error( 'Invalid repository URL provided.' );
+            return new WP_Error( 'invalid_repo_url', __( 'Repository URL is invalid.', 'gitsync' ) );
+        }
+
+        if ( ! $this->validate_branch( $branch ) ) {
+            $this->log_error( 'Invalid branch name provided: ' . $branch );
+            return new WP_Error( 'invalid_branch', __( 'Branch name is invalid.', 'gitsync' ) );
+        }
         
         // Build authenticated URL if credentials provided
         if ( ! empty( $username ) && ! empty( $token ) ) {
@@ -97,9 +108,11 @@ class GitSync_Git_Operations {
         $output = array();
         $return_var = 0;
         exec( $command, $output, $return_var );
-        
+
         if ( $return_var !== 0 ) {
-            $this->log_error( 'Clone failed: ' . implode( "\n", $output ) );
+            $msg = implode( "\n", $output );
+            // Mask token if present before logging
+            $this->log_error( 'Clone failed: ' . $this->mask_token_in_message( $msg, $token ) );
             return new WP_Error( 'clone_failed', __( 'Failed to clone repository.', 'gitsync' ), $output );
         }
         
@@ -114,11 +127,17 @@ class GitSync_Git_Operations {
         $username = get_option( 'gitsync_username', '' );
         $token = get_option( 'gitsync_token', '' );
         
+        // Validate branch
+        if ( ! $this->validate_branch( $branch ) ) {
+            $this->log_error( 'Invalid branch name provided: ' . $branch );
+            return new WP_Error( 'invalid_branch', __( 'Branch name is invalid.', 'gitsync' ) );
+        }
+
         // Configure credentials if provided
         if ( ! empty( $username ) && ! empty( $token ) ) {
             $this->configure_credentials( $username, $token );
         }
-        
+
         $command = sprintf(
             'cd %s && git fetch origin && git reset --hard origin/%s 2>&1',
             escapeshellarg( $this->repo_path ),
@@ -130,7 +149,8 @@ class GitSync_Git_Operations {
         exec( $command, $output, $return_var );
         
         if ( $return_var !== 0 ) {
-            $this->log_error( 'Pull failed: ' . implode( "\n", $output ) );
+            $msg = implode( "\n", $output );
+            $this->log_error( 'Pull failed: ' . $this->mask_token_in_message( $msg, $token ) );
             return new WP_Error( 'pull_failed', __( 'Failed to pull changes.', 'gitsync' ), $output );
         }
         
@@ -150,8 +170,57 @@ class GitSync_Git_Operations {
         $scheme = isset( $parsed['scheme'] ) ? $parsed['scheme'] : 'https';
         $host = isset( $parsed['host'] ) ? $parsed['host'] : '';
         $path = isset( $parsed['path'] ) ? $parsed['path'] : '';
-        
-        return sprintf( '%s://%s:%s@%s%s', $scheme, $username, $token, $host, $path );
+
+        // URL-encode credentials to prevent special chars from breaking the URL/shell
+        $u = rawurlencode( $username );
+        $t = rawurlencode( $token );
+
+        return sprintf( '%s://%s:%s@%s%s', $scheme, $u, $t, $host, $path );
+    }
+
+    /**
+     * Validate a branch name to avoid shell injection via branch input.
+     * Allows letters, numbers, dot, underscore, hyphen and slash (for names like feature/x).
+     */
+    private function validate_branch( $branch ) {
+        if ( ! is_string( $branch ) ) {
+            return false;
+        }
+        return (bool) preg_match( '/^[A-Za-z0-9._\-\/]+$/', $branch );
+    }
+
+    /**
+     * Basic repo URL validation - only allow common schemes and require a host/path
+     */
+    private function validate_repo_url( $url ) {
+        $parsed = parse_url( $url );
+        if ( ! $parsed || empty( $parsed['host'] ) ) {
+            return false;
+        }
+
+        $scheme = isset( $parsed['scheme'] ) ? $parsed['scheme'] : '';
+        $allowed = array( 'https', 'http', 'git', 'ssh' );
+        // Also allow scp-like git@host:repo.git forms (no scheme) - keep basic check
+        if ( in_array( $scheme, $allowed, true ) ) {
+            return true;
+        }
+
+        // If no scheme but contains @ and ':' it's likely an scp-style URL (git@github.com:owner/repo.git)
+        if ( strpos( $url, '@' ) !== false && strpos( $url, ':' ) !== false ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Mask token values in a message to avoid leaking secrets in logs
+     */
+    private function mask_token_in_message( $message, $token ) {
+        if ( empty( $token ) ) {
+            return $message;
+        }
+        return str_replace( $token, '****', $message );
     }
     
     /**
