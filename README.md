@@ -3,6 +3,8 @@ GitSync for WordPress
 
 A WordPress plugin that keeps your WordPress content (pages, posts, and WooCommerce products) in sync with a remote Git repository containing Markdown files.
 
+[documentation](https://wilsonify.github.io/git-sync-for-wordpress)
+
 ## Features
 
 - **Automatic Content Sync**: Pull content from a Git repository and automatically create/update WordPress posts, pages, and WooCommerce products
