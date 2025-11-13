@@ -1,5 +1,16 @@
-GitSync for WordPress
-=====
+---
+layout: default
+title: GitSync for WordPress
+---
+
+<!--
+This index page is generated from the repository README.md and placed in docs/
+for GitHub Pages. To edit site content, update the corresponding markdown files
+in the repository root (README.md, QUICKSTART.md, INSTALLATION.md, etc.)
+and keep them in sync with docs/ as needed.
+-->
+
+# GitSync for WordPress
 
 A WordPress plugin that keeps your WordPress content (pages, posts, and WooCommerce products) in sync with a remote Git repository containing Markdown files.
 
@@ -31,7 +42,7 @@ For detailed installation instructions, see the Installation guide in the sideba
 
 ## License
 
-MIT
+GPL-2.0+
 
 ## Support
 

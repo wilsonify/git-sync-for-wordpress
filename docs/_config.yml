@@ -1,0 +1,4 @@
+title: Git Sync for WordPress
+theme: minima
+markdown: kramdown
+# Use the docs/ folder as the site source on GitHub Pages (set in repo settings)

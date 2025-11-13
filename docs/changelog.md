@@ -1,9 +1,11 @@
+---
+layout: default
+title: Changelog
+---
+
 # Changelog
 
 All notable changes to GitSync will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2025-01-15
 
@@ -14,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Markdown to HTML conversion
 - YAML frontmatter parsing for metadata
 - WordPress Post synchronization
-- WordPress Page synchronization  
+- WordPress Page synchronization
 - WooCommerce Product synchronization
 - Manual sync via admin interface
 - Scheduled hourly sync option
@@ -27,20 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Content type override via metadata
 - Error logging and debugging support
 - Security features (nonce verification, capability checks)
-- Repository credentials support (username/token)
-- Comprehensive documentation (README, INSTALLATION, CONTRIBUTING)
-- Example Markdown files for posts, pages, and products
-- Quick reference guide
-- Validation script for plugin structure
-- Admin CSS styling
-- Admin JavaScript for AJAX sync
-
-### Security
-- Input sanitization for all user inputs
-- Output escaping for all outputs
-- Nonce verification for AJAX requests
-- Capability checks for admin actions
-- Secure credential storage in WordPress options
 
 ## [Unreleased]
 
@@ -60,20 +48,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shallow clone support
 - Selective directory sync
 - Custom metadata field mapping
-
-### Known Issues
-- None currently reported
-
----
-
-## Version History
-
-- **1.0.0** (2025-01-15): Initial release
-
-## Links
-
-- [Repository](https://github.com/wilsonify/git-sync-for-wordpress)
-- [Documentation](README.md)
-- [Installation Guide](INSTALLATION.md)
-- [Quick Start](QUICKSTART.md)
-- [Contributing](CONTRIBUTING.md)
