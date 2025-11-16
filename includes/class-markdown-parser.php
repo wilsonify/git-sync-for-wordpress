@@ -165,9 +165,7 @@ class GitSyncMarkdownParser {
                 $processed[] = '<p>' . $para . '</p>';
             }
         }
-        $html = implode( "\n", $processed );
-        
-        return $html;
+        return implode( "\n", $processed );
     }
     
     /**

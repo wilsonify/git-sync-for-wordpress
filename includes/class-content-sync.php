@@ -68,7 +68,7 @@ class GitSyncContentSync {
      * Perform the actual sync
      */
     private static function performSync() {
-	$git_ops = new GitSyncGitOperations();
+    $git_ops = new GitSyncGitOperations();
         $parser = new GitSyncMarkdownParser();
         
         // Sync repository

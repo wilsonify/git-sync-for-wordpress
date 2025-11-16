@@ -40,13 +40,13 @@ class GitSync {
      */
     private static $instance = null;
 
-	/** @var GitSyncSyncScheduler */
-	private $scheduler;
+    /** @var GitSyncSyncScheduler */
+    private $scheduler;
     
     /**
      * Get instance of the class
      */
-    public static function get_instance() {
+    public static function getInstance() {
         if ( null === self::$instance ) {
             self::$instance = new self();
         }
@@ -58,23 +58,23 @@ class GitSync {
      */
     private function __construct() {
         $this->scheduler = new GitSyncSyncScheduler();
-        $this->init_hooks();
+        $this->initHooks();
     }
     
     /**
      * Initialize hooks
      */
-    private function init_hooks() {
+    private function initHooks() {
         register_activation_hook( __FILE__, array( $this, 'activate' ) );
         register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
         
-        add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+        add_action( 'plugins_loaded', array( $this, 'loadTextdomain' ) );
         add_action( 'admin_menu', array( GitSyncAdminSettings::class, 'addAdminMenu' ) );
         add_action( 'admin_init', array( GitSyncAdminSettings::class, 'registerSettings' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueueAdminAssets' ) );
         
         // AJAX hooks for sync actions
-        add_action( 'wp_ajax_gitsync_manual_sync', array( GitSyncContentSync::class, 'manualSync' ) );
+    add_action( 'wp_ajax_gitsync_manual_sync', array( GitSyncContentSync::class, 'manualSync' ) );
         
         // Scheduled sync
         add_action( 'gitsync_scheduled_sync', array( GitSyncContentSync::class, 'scheduledSync' ) );
@@ -110,14 +110,14 @@ class GitSync {
     /**
      * Load plugin textdomain
      */
-    public function load_textdomain() {
+    public function loadTextdomain() {
         load_plugin_textdomain( 'gitsync', false, dirname( GITSYNC_PLUGIN_BASENAME ) . '/languages' );
     }
     
     /**
      * Enqueue admin assets
      */
-    public function enqueue_admin_assets( $hook ) {
+    public function enqueueAdminAssets( $hook ) {
         if ( 'toplevel_page_gitsync-settings' !== $hook ) {
             return;
         }
@@ -140,9 +140,9 @@ class GitSync {
 /**
  * Initialize the plugin
  */
-function gitsync_init() {
-    return GitSync::get_instance();
+function gitsyncInit() {
+    return GitSync::getInstance();
 }
 
 // Start the plugin
-gitsync_init();
+gitsyncInit();

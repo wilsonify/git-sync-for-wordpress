@@ -28,7 +28,7 @@ function __ ( $text, $domain = null ) {
     if ( null !== $domain ) {
         // domain parameter kept for signature parity with WordPress
     }
-	return $text;
+    return $text;
 }
 
 // Minimal WP_Error implementation for tests

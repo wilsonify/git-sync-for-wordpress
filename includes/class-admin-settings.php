@@ -141,8 +141,8 @@ class GitSyncAdminSettings {
         // Handle manual sync trigger
         $sync_message = '';
         if ( isset( $_GET['sync_triggered'] ) && $_GET['sync_triggered'] === '1' ) {
-            $sync_message = '<div class="notice notice-info"><p>' . 
-                __( 'Sync has been triggered. Check the status below.', 'gitsync' ) . 
+            $sync_message = '<div class="notice notice-info"><p>' .
+                __( 'Sync has been triggered. Check the status below.', 'gitsync' ) .
                 '</p></div>';
         }
         

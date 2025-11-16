@@ -160,7 +160,7 @@ class GitSyncGitOperations {
 
         // Configure credentials if provided
         if ( ! empty( $username ) && ! empty( $token ) ) {
-            $this->configureCredentials( $username, $token );
+            $this->configureCredentials();
         }
 
         $command = sprintf(
@@ -244,7 +244,7 @@ class GitSyncGitOperations {
     /**
      * Configure credentials for git
      */
-    private function configureCredentials( $username, $token ) {
+    private function configureCredentials() {
         exec( sprintf(
             'cd %s && git config credential.helper store 2>&1',
             escapeshellarg( $this->repoPath )
