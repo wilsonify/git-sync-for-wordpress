@@ -2,6 +2,7 @@
     "name": "wilsonify/git-sync-for-wordpress",
     "description": "Git-backed sync for WordPress (tests added)",
     "type": "wordpress-plugin",
+    "license": "MIT",
     "require": {
         "php": ">=7.4",
         "symfony/process": "^5.4"
