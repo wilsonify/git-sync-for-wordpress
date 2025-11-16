@@ -8,19 +8,19 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class GitSync_Content_Sync {
+class GitSyncContentSync {
     
     /**
      * Manual sync triggered from admin
      */
-    public static function manual_sync() {
+    public static function manualSync() {
         check_ajax_referer( 'gitsync_nonce', 'nonce' );
         
         if ( ! current_user_can( 'manage_options' ) ) {
             wp_send_json_error( array( 'message' => __( 'Permission denied.', 'gitsync' ) ) );
         }
         
-        $result = self::perform_sync();
+    $result = self::performSync();
         
         if ( is_wp_error( $result ) ) {
             wp_send_json_error( array(
@@ -38,27 +38,27 @@ class GitSync_Content_Sync {
     /**
      * Scheduled sync
      */
-    public static function scheduled_sync() {
+    public static function scheduledSync() {
         if ( get_option( 'gitsync_auto_sync', false ) ) {
-            self::perform_sync();
+            self::performSync();
         }
     }
     
     /**
      * Perform the actual sync
      */
-    private static function perform_sync() {
-        $git_ops = new GitSync_Git_Operations();
-        $parser = new GitSync_Markdown_Parser();
+    private static function performSync() {
+	$git_ops = new GitSyncGitOperations();
+        $parser = new GitSyncMarkdownParser();
         
         // Sync repository
-        $sync_result = $git_ops->sync_repository();
+    $sync_result = $git_ops->syncRepository();
         if ( is_wp_error( $sync_result ) ) {
             return $sync_result;
         }
         
         // Get markdown files
-        $files = $git_ops->get_markdown_files();
+    $files = $git_ops->getMarkdownFiles();
         
         $stats = array(
             'processed' => 0,
@@ -72,18 +72,18 @@ class GitSync_Content_Sync {
             $stats['processed']++;
             
             // Parse file
-            $parsed = $parser->parse_file( $file );
+            $parsed = $parser->parseFile( $file );
             if ( is_wp_error( $parsed ) ) {
                 $stats['errors']++;
-                self::log_error( 'Failed to parse file: ' . $file . ' - ' . $parsed->get_error_message() );
+                self::logError( 'Failed to parse file: ' . $file . ' - ' . $parsed->get_error_message() );
                 continue;
             }
             
             // Sync content based on type
-            $result = self::sync_content_item( $parsed, $parser );
+            $result = self::syncContentItem( $parsed, $parser );
             if ( is_wp_error( $result ) ) {
                 $stats['errors']++;
-                self::log_error( 'Failed to sync content: ' . $file . ' - ' . $result->get_error_message() );
+                self::logError( 'Failed to sync content: ' . $file . ' - ' . $result->get_error_message() );
             } elseif ( $result === 'created' ) {
                 $stats['created']++;
             } elseif ( $result === 'updated' ) {
@@ -99,9 +99,9 @@ class GitSync_Content_Sync {
     /**
      * Sync individual content item
      */
-    private static function sync_content_item( $data, $parser ) {
-        $content_type = $data['content_type'];
-        $slug = $parser->extract_slug( $data );
+    private static function syncContentItem( $data, $parser ) {
+    $content_type = $data['content_type'];
+    $slug = $parser->extractSlug( $data );
         
         // Get title from metadata or content
         $title = isset( $data['metadata']['title'] ) ? $data['metadata']['title'] : '';
@@ -113,7 +113,7 @@ class GitSync_Content_Sync {
         }
         
         // Check if content already exists
-        $existing = self::find_existing_content( $slug, $content_type );
+    $existing = self::findExistingContent( $slug, $content_type );
         
         // Prepare post data
         $post_data = array(
@@ -148,7 +148,7 @@ class GitSync_Content_Sync {
                 if ( is_wp_error( $post_id ) ) {
                     return $post_id;
                 }
-                self::update_post_meta( $post_id, $data, $content_type );
+                self::updatePostMeta( $post_id, $data, $content_type );
                 return 'updated';
             }
             return 'skipped';
@@ -158,7 +158,7 @@ class GitSync_Content_Sync {
             if ( is_wp_error( $post_id ) ) {
                 return $post_id;
             }
-            self::update_post_meta( $post_id, $data, $content_type );
+            self::updatePostMeta( $post_id, $data, $content_type );
             return 'created';
         }
     }
@@ -166,7 +166,7 @@ class GitSync_Content_Sync {
     /**
      * Find existing content by slug
      */
-    private static function find_existing_content( $slug, $content_type ) {
+    private static function findExistingContent( $slug, $content_type ) {
         $post_type = $content_type === 'product' ? 'product' : $content_type;
         
         $posts = get_posts( array(
@@ -182,7 +182,7 @@ class GitSync_Content_Sync {
     /**
      * Update post meta from markdown metadata
      */
-    private static function update_post_meta( $post_id, $data, $content_type ) {
+    private static function updatePostMeta( $post_id, $data, $content_type ) {
         // Store original file path
         update_post_meta( $post_id, '_gitsync_file_path', $data['file_path'] );
         update_post_meta( $post_id, '_gitsync_synced', current_time( 'mysql' ) );
@@ -247,7 +247,7 @@ class GitSync_Content_Sync {
     /**
      * Log error message
      */
-    private static function log_error( $message ) {
+    private static function logError( $message ) {
         error_log( '[GitSync Error] ' . $message );
     }
 }

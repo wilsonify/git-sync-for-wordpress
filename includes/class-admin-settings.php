@@ -8,12 +8,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class GitSync_Admin_Settings {
+class GitSyncAdminSettings {
     
     /**
      * Add admin menu
      */
-    public static function add_admin_menu() {
+    public static function addAdminMenu() {
         add_menu_page(
             __( 'GitSync Settings', 'gitsync' ),
             __( 'GitSync', 'gitsync' ),
@@ -28,7 +28,7 @@ class GitSync_Admin_Settings {
     /**
      * Register settings
      */
-    public static function register_settings() {
+    public static function registerSettings() {
         // Repository settings
         register_setting( 'gitsync_settings', 'gitsync_repo_url', array(
             'type' => 'string',
@@ -116,7 +116,7 @@ class GitSync_Admin_Settings {
     /**
      * Render settings page
      */
-    public static function render_settings_page() {
+    public static function renderSettingsPage() {
         if ( ! current_user_can( 'manage_options' ) ) {
             return;
         }
@@ -187,21 +187,21 @@ Your content here...</pre>
     /**
      * Render repository section
      */
-    public static function render_repo_section() {
+    public static function renderRepoSection() {
         echo '<p>' . __( 'Configure your Git repository connection settings.', 'gitsync' ) . '</p>';
     }
     
     /**
      * Render sync section
      */
-    public static function render_sync_section() {
+    public static function renderSyncSection() {
         echo '<p>' . __( 'Configure synchronization behavior.', 'gitsync' ) . '</p>';
     }
     
     /**
      * Render repository URL field
      */
-    public static function render_repo_url_field() {
+    public static function renderRepoUrlField() {
         $value = get_option( 'gitsync_repo_url', '' );
         ?>
         <input type="url" name="gitsync_repo_url" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
@@ -214,7 +214,7 @@ Your content here...</pre>
     /**
      * Render branch field
      */
-    public static function render_branch_field() {
+    public static function renderBranchField() {
         $value = get_option( 'gitsync_branch', 'main' );
         ?>
         <input type="text" name="gitsync_branch" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
@@ -227,7 +227,7 @@ Your content here...</pre>
     /**
      * Render username field
      */
-    public static function render_username_field() {
+    public static function renderUsernameField() {
         $value = get_option( 'gitsync_username', '' );
         ?>
         <input type="text" name="gitsync_username" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
@@ -240,7 +240,7 @@ Your content here...</pre>
     /**
      * Render token field
      */
-    public static function render_token_field() {
+    public static function renderTokenField() {
         $value = get_option( 'gitsync_token', '' );
         ?>
         <input type="password" name="gitsync_token" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
@@ -253,7 +253,7 @@ Your content here...</pre>
     /**
      * Render auto sync field
      */
-    public static function render_auto_sync_field() {
+    public static function renderAutoSyncField() {
         $value = get_option( 'gitsync_auto_sync', false );
         ?>
         <label>

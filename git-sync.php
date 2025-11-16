@@ -23,12 +23,6 @@ define( 'GITSYNC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GITSYNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GITSYNC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
-// Load Composer autoloader if present (needed for Symfony Process, etc.).
-$gitsync_autoload = GITSYNC_PLUGIN_DIR . 'vendor/autoload.php';
-if ( file_exists( $gitsync_autoload ) ) {
-    require_once $gitsync_autoload;
-}
-
 /**
  * Main GitSync Class
  */
@@ -61,7 +55,6 @@ class GitSync {
      * Include required files
      */
     private function includes() {
-        require_once GITSYNC_PLUGIN_DIR . 'includes/class-command-runner.php';
         require_once GITSYNC_PLUGIN_DIR . 'includes/class-git-operations.php';
         require_once GITSYNC_PLUGIN_DIR . 'includes/class-markdown-parser.php';
         require_once GITSYNC_PLUGIN_DIR . 'includes/class-content-sync.php';
