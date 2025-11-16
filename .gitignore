@@ -23,3 +23,5 @@ vendor/
 
 # Temporary files
 /tmp/
+build/
+dist/

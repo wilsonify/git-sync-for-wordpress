@@ -4,16 +4,22 @@
  * Parses Markdown files and extracts content and metadata
  */
 
+namespace GitSync;
+
+use WP_Error;
+use function __;
+use function sanitize_title;
+
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class GitSync_Markdown_Parser {
+class GitSyncMarkdownParser {
     
     /**
      * Parse markdown file
      */
-    public function parse_file( $file_path ) {
+    public function parseFile( $file_path ) {
         if ( ! file_exists( $file_path ) ) {
             return new WP_Error( 'file_not_found', __( 'Markdown file not found.', 'gitsync' ) );
         }
@@ -23,13 +29,13 @@ class GitSync_Markdown_Parser {
             return new WP_Error( 'read_error', __( 'Failed to read markdown file.', 'gitsync' ) );
         }
         
-        return $this->parse_content( $content, $file_path );
+    return $this->parseContent( $content, $file_path );
     }
     
     /**
      * Parse markdown content
      */
-    public function parse_content( $content, $file_path = '' ) {
+    public function parseContent( $content, $file_path = '' ) {
         $data = array(
             'metadata' => array(),
             'content' => '',
@@ -38,7 +44,7 @@ class GitSync_Markdown_Parser {
         
         // Check for front matter (YAML between --- markers)
         if ( preg_match( '/^---\s*\n(.*?)\n---\s*\n(.*)$/s', $content, $matches ) ) {
-            $data['metadata'] = $this->parse_yaml_frontmatter( $matches[1] );
+            $data['metadata'] = $this->parseYamlFrontmatter( $matches[1] );
             $data['content'] = trim( $matches[2] );
         } else {
             // No front matter, entire content is markdown
@@ -51,10 +57,10 @@ class GitSync_Markdown_Parser {
         }
         
         // Convert markdown to HTML
-        $data['html_content'] = $this->markdown_to_html( $data['content'] );
+    $data['html_content'] = $this->markdownToHtml( $data['content'] );
         
         // Determine content type from metadata or file path
-        $data['content_type'] = $this->determine_content_type( $data['metadata'], $file_path );
+    $data['content_type'] = $this->determineContentType( $data['metadata'], $file_path );
         
         return $data;
     }
@@ -62,7 +68,7 @@ class GitSync_Markdown_Parser {
     /**
      * Parse YAML frontmatter
      */
-    private function parse_yaml_frontmatter( $yaml ) {
+    private function parseYamlFrontmatter( $yaml ) {
         $metadata = array();
         $lines = explode( "\n", $yaml );
         
@@ -96,7 +102,7 @@ class GitSync_Markdown_Parser {
     /**
      * Convert markdown to HTML
      */
-    private function markdown_to_html( $markdown ) {
+    private function markdownToHtml( $markdown ) {
         // Basic markdown to HTML conversion
         // For production, consider using a library like Parsedown
         
@@ -129,9 +135,9 @@ class GitSync_Markdown_Parser {
         $html = preg_replace( '/`(.+?)`/', '<code>$1</code>', $html );
         
         // Lists - Unordered
-        $html = preg_replace_callback( '/^(\*|\-)\s+(.+)$/m', function( $matches ) {
+        $html = preg_replace_callback( '/^[-*]\s+(.+)$/m', function( $matches ) {
             static $in_list = false;
-            $item = '<li>' . $matches[2] . '</li>';
+            $item = '<li>' . $matches[1] . '</li>';
             if ( ! $in_list ) {
                 $in_list = true;
                 return '<ul>' . $item;
@@ -159,41 +165,36 @@ class GitSync_Markdown_Parser {
                 $processed[] = '<p>' . $para . '</p>';
             }
         }
-        $html = implode( "\n", $processed );
-        
-        return $html;
+        return implode( "\n", $processed );
     }
     
     /**
      * Determine content type from metadata or file path
      */
-    private function determine_content_type( $metadata, $file_path ) {
-        // Check metadata for explicit type
-        if ( isset( $metadata['type'] ) ) {
-            $type = strtolower( $metadata['type'] );
-            if ( in_array( $type, array( 'post', 'page', 'product' ) ) ) {
-                return $type;
-            }
+    private function determineContentType( $metadata, $file_path ) {
+        $candidate = isset( $metadata['type'] ) ? strtolower( $metadata['type'] ) : '';
+        if ( in_array( $candidate, array( 'post', 'page', 'product' ), true ) ) {
+            return $candidate;
         }
-        
-        // Check file path for type indicators
+
         $path_lower = strtolower( $file_path );
-        if ( strpos( $path_lower, '/posts/' ) !== false || strpos( $path_lower, '/blog/' ) !== false ) {
-            return 'post';
-        } elseif ( strpos( $path_lower, '/products/' ) !== false ) {
-            return 'product';
+        $type = 'post';
+
+        if ( strpos( $path_lower, '/products/' ) !== false ) {
+            $type = 'product';
         } elseif ( strpos( $path_lower, '/pages/' ) !== false ) {
-            return 'page';
+            $type = 'page';
+        } elseif ( strpos( $path_lower, '/posts/' ) !== false || strpos( $path_lower, '/blog/' ) !== false ) {
+            $type = 'post';
         }
-        
-        // Default to post
-        return 'post';
+
+        return $type;
     }
     
     /**
      * Extract slug from file path or metadata
      */
-    public function extract_slug( $data ) {
+    public function extractSlug( $data ) {
         // Check metadata first
         if ( isset( $data['metadata']['slug'] ) ) {
             return sanitize_title( $data['metadata']['slug'] );

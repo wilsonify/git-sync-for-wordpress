@@ -5,25 +5,37 @@
  * Run this to check if the plugin structure is valid
  */
 
+// @codeCoverageIgnoreStart
+
 echo "GitSync Plugin Validation\n";
 echo "==========================\n\n";
-
-if ( ! defined( 'GITSYNC_CLI' ) ) {
-    define( 'GITSYNC_CLI', true );
-}
-
-$autoload_path = __DIR__ . '/vendor/autoload.php';
-if ( ! file_exists( $autoload_path ) ) {
-    echo "❌ Error: Composer dependencies missing. Run 'composer install' first.\n";
-    exit( 1 );
-}
-
-require_once $autoload_path;
-require_once __DIR__ . '/includes/class-command-runner.php';
 
 $errors = 0;
 $warnings = 0;
 $checks = 0;
+
+const GITSYNC_INCLUDE_CLASS_MAP = array(
+    'git_operations' => array(
+        'path' => 'includes/class-git-operations.php',
+        'class' => 'GitSyncGitOperations',
+    ),
+    'markdown_parser' => array(
+        'path' => 'includes/class-markdown-parser.php',
+        'class' => 'GitSyncMarkdownParser',
+    ),
+    'content_sync' => array(
+        'path' => 'includes/class-content-sync.php',
+        'class' => 'GitSyncContentSync',
+    ),
+    'admin_settings' => array(
+        'path' => 'includes/class-admin-settings.php',
+        'class' => 'GitSyncAdminSettings',
+    ),
+    'sync_scheduler' => array(
+        'path' => 'includes/class-sync-scheduler.php',
+        'class' => 'GitSyncSyncScheduler',
+    ),
+);
 
 // Check if we're in the right directory
 if ( ! file_exists( 'git-sync.php' ) ) {
@@ -32,7 +44,7 @@ if ( ! file_exists( 'git-sync.php' ) ) {
 }
 
 // Function to check file exists
-function check_file( $path, $required = true ) {
+function checkFile( $path, $required = true ) {
     global $errors, $warnings, $checks;
     $checks++;
     
@@ -52,32 +64,27 @@ function check_file( $path, $required = true ) {
 }
 
 // Function to check PHP syntax
-function check_php_syntax( $path ) {
+function checkPhpSyntax( $path ) {
     global $errors, $checks;
     $checks++;
     
-    $full_path = realpath( $path );
-    if ( false === $full_path ) {
-        echo "❌ PHP syntax check skipped (file missing): $path\n";
-        $errors++;
-        return false;
-    }
-
-    $result = GitSync_Command_Runner::run( array( PHP_BINARY, '-l', $full_path ) );
+    $output = array();
+    $return_var = 0;
+    exec( "php -l " . escapeshellarg( $path ) . " 2>&1", $output, $return_var );
     
-    if ( true === $result['success'] ) {
+    if ( $return_var === 0 ) {
         echo "✅ Valid PHP syntax: $path\n";
         return true;
     } else {
         echo "❌ PHP syntax error in: $path\n";
-        echo "   " . implode( "\n   ", $result['output'] ) . "\n";
+        echo "   " . implode( "\n   ", $output ) . "\n";
         $errors++;
         return false;
     }
 }
 
 // Function to check class exists in file
-function check_class_exists( $path, $class_name ) {
+function checkClassExists( $path, $class_name ) {
     global $errors, $warnings, $checks;
     $checks++;
     
@@ -98,62 +105,56 @@ function check_class_exists( $path, $class_name ) {
 
 echo "Checking core files...\n";
 echo "----------------------\n";
-check_file( 'git-sync.php', true );
-check_file( 'README.md', true );
-check_file( 'INSTALLATION.md', false );
-check_file( 'CONTRIBUTING.md', false );
-check_file( '.gitignore', false );
+checkFile( 'git-sync.php', true );
+checkFile( 'README.md', true );
+checkFile( 'INSTALLATION.md', false );
+checkFile( 'CONTRIBUTING.md', false );
+checkFile( '.gitignore', false );
 echo "\n";
 
 echo "Checking directory structure...\n";
 echo "--------------------------------\n";
-check_file( 'includes', true );
-check_file( 'assets', true );
-check_file( 'assets/css', true );
-check_file( 'assets/js', true );
-check_file( 'examples', false );
+checkFile( 'includes', true );
+checkFile( 'assets', true );
+checkFile( 'assets/css', true );
+checkFile( 'assets/js', true );
+checkFile( 'examples', false );
 echo "\n";
 
 echo "Checking include files...\n";
 echo "-------------------------\n";
-check_file( 'includes/class-git-operations.php', true );
-check_file( 'includes/class-markdown-parser.php', true );
-check_file( 'includes/class-content-sync.php', true );
-check_file( 'includes/class-admin-settings.php', true );
-check_file( 'includes/class-sync-scheduler.php', true );
+foreach ( GITSYNC_INCLUDE_CLASS_MAP as $include ) {
+    checkFile( $include['path'], true );
+}
 echo "\n";
 
 echo "Checking asset files...\n";
 echo "-----------------------\n";
-check_file( 'assets/css/admin.css', true );
-check_file( 'assets/js/admin.js', true );
+checkFile( 'assets/css/admin.css', true );
+checkFile( 'assets/js/admin.js', true );
 echo "\n";
 
 echo "Checking PHP syntax...\n";
 echo "----------------------\n";
-check_php_syntax( 'git-sync.php' );
-check_php_syntax( 'includes/class-git-operations.php' );
-check_php_syntax( 'includes/class-markdown-parser.php' );
-check_php_syntax( 'includes/class-content-sync.php' );
-check_php_syntax( 'includes/class-admin-settings.php' );
-check_php_syntax( 'includes/class-sync-scheduler.php' );
+checkPhpSyntax( 'git-sync.php' );
+foreach ( GITSYNC_INCLUDE_CLASS_MAP as $include ) {
+    checkPhpSyntax( $include['path'] );
+}
 echo "\n";
 
 echo "Checking classes...\n";
 echo "-------------------\n";
-check_class_exists( 'git-sync.php', 'GitSync' );
-check_class_exists( 'includes/class-git-operations.php', 'GitSync_Git_Operations' );
-check_class_exists( 'includes/class-markdown-parser.php', 'GitSync_Markdown_Parser' );
-check_class_exists( 'includes/class-content-sync.php', 'GitSync_Content_Sync' );
-check_class_exists( 'includes/class-admin-settings.php', 'GitSync_Admin_Settings' );
-check_class_exists( 'includes/class-sync-scheduler.php', 'GitSync_Sync_Scheduler' );
+checkClassExists( 'git-sync.php', 'GitSync' );
+foreach ( GITSYNC_INCLUDE_CLASS_MAP as $include ) {
+    checkClassExists( $include['path'], $include['class'] );
+}
 echo "\n";
 
 echo "Checking example files...\n";
 echo "-------------------------\n";
-check_file( 'examples/example-post.md', false );
-check_file( 'examples/example-page.md', false );
-check_file( 'examples/example-product.md', false );
+checkFile( 'examples/example-post.md', false );
+checkFile( 'examples/example-page.md', false );
+checkFile( 'examples/example-product.md', false );
 echo "\n";
 
 // Summary
@@ -167,10 +168,12 @@ echo "\n";
 if ( $errors > 0 ) {
     echo "❌ Validation FAILED with $errors error(s)\n";
     exit( 1 );
-} else if ( $warnings > 0 ) {
+} elseif ( $warnings > 0 ) {
     echo "⚠️  Validation PASSED with $warnings warning(s)\n";
     exit( 0 );
 } else {
     echo "✅ Validation PASSED - All checks successful!\n";
     exit( 0 );
 }
+
+// @codeCoverageIgnoreEnd

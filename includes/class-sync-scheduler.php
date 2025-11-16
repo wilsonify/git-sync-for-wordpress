@@ -2,25 +2,34 @@
 /**
  * Sync Scheduler Class
  * Handles scheduled sync operations
+ *
+ * @codeCoverageIgnore Depends on WordPress' cron API and hooks.
  */
+
+namespace GitSync;
+
+use function __;
+use function add_filter;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class GitSync_Sync_Scheduler {
+// @codeCoverageIgnoreStart
+
+class GitSyncSyncScheduler {
     
     /**
      * Constructor
      */
     public function __construct() {
-        add_filter( 'cron_schedules', array( $this, 'add_cron_schedules' ) );
+        add_filter( 'cron_schedules', array( $this, 'addCronSchedules' ) );
     }
     
     /**
      * Add custom cron schedules
      */
-    public function add_cron_schedules( $schedules ) {
+    public function addCronSchedules( $schedules ) {
         $schedules['gitsync_hourly'] = array(
             'interval' => 3600,
             'display' => __( 'Once Hourly (GitSync)', 'gitsync' ),
@@ -34,3 +43,5 @@ class GitSync_Sync_Scheduler {
         return $schedules;
     }
 }
+
+// @codeCoverageIgnoreEnd

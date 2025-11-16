@@ -3,13 +3,15 @@
  * Lightweight command runner that delegates to Symfony's Process component.
  */
 
+namespace GitSync;
+
 use Symfony\Component\Process\Process;
 
 if ( ! defined( 'ABSPATH' ) && ! defined( 'GITSYNC_CLI' ) ) {
     exit;
 }
 
-class GitSync_Command_Runner {
+class GitSyncCommandRunner {
 
     /**
      * Execute a command safely without invoking the system shell.
@@ -31,14 +33,14 @@ class GitSync_Command_Runner {
         return array(
             'success'   => $process->isSuccessful(),
             'exit_code' => $process->getExitCode(),
-            'output'    => self::normalize_output( $process->getOutput(), $process->getErrorOutput() ),
+            'output'    => self::normalizeOutput( $process->getOutput(), $process->getErrorOutput() ),
         );
     }
 
     /**
      * Convert stdout/stderr into a trimmed array of lines.
      */
-    private static function normalize_output( $stdout, $stderr ) {
+    private static function normalizeOutput( $stdout, $stderr ) {
         $combined = trim( (string) $stdout . ( $stderr ? "\n" . $stderr : '' ) );
 
         if ( '' === $combined ) {
