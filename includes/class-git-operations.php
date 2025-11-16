@@ -218,6 +218,14 @@ class GitSyncGitOperations {
      * Basic repo URL validation - only allow common schemes and require a host/path
      */
     private function validateRepoUrl( $url ) {
+        $looks_like_scp = strpos( $url, '@' ) !== false
+            && strpos( $url, ':' ) !== false
+            && strpos( $url, '://' ) === false;
+
+        if ( $looks_like_scp ) {
+            return true;
+        }
+
         $parsed = parse_url( $url );
         if ( ! $parsed || empty( $parsed['host'] ) ) {
             return false;
@@ -225,10 +233,7 @@ class GitSyncGitOperations {
 
         $scheme = isset( $parsed['scheme'] ) ? $parsed['scheme'] : '';
         $allowed = array( 'https', 'http', 'git', 'ssh' );
-        $accepted = in_array( $scheme, $allowed, true );
-        $looks_like_scp = ! $scheme && strpos( $url, '@' ) !== false && strpos( $url, ':' ) !== false;
-
-        return $accepted || $looks_like_scp;
+        return in_array( $scheme, $allowed, true );
     }
 
     /**
