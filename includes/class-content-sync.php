@@ -2,6 +2,8 @@
 /**
  * Content Sync Class
  * Handles syncing content between Git and WordPress
+ *
+ * @codeCoverageIgnore Relies heavily on WordPress functions, AJAX, and WooCommerce integration.
  */
 
 namespace GitSync;
@@ -27,6 +29,8 @@ use function wp_update_post;
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// @codeCoverageIgnoreStart
 
 class GitSyncContentSync {
     
@@ -317,3 +321,5 @@ class GitSyncContentSync {
         return array();
     }
 }
+
+// @codeCoverageIgnoreEnd

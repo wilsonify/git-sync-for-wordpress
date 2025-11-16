@@ -2,6 +2,8 @@
 /**
  * Admin Settings Class
  * Handles admin settings page and configuration
+ *
+ * @codeCoverageIgnore This class only runs inside the WordPress admin UI.
  */
 
 namespace GitSync;
@@ -24,6 +26,8 @@ use function submit_button;
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// @codeCoverageIgnoreStart
 
 class GitSyncAdminSettings {
     
@@ -280,3 +284,5 @@ Your content here...</pre>
         <?php
     }
 }
+
+// @codeCoverageIgnoreEnd

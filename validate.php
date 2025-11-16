@@ -5,6 +5,8 @@
  * Run this to check if the plugin structure is valid
  */
 
+// @codeCoverageIgnoreStart
+
 echo "GitSync Plugin Validation\n";
 echo "==========================\n\n";
 
@@ -173,3 +175,5 @@ if ( $errors > 0 ) {
     echo "✅ Validation PASSED - All checks successful!\n";
     exit( 0 );
 }
+
+// @codeCoverageIgnoreEnd

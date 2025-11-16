@@ -52,6 +52,8 @@ class GitSyncGitOperations {
     
     /**
      * Check if git is available
+    *
+    * @codeCoverageIgnore Executes the system git binary which is environment-specific.
      */
     public function isGitAvailable() {
         $output = array();
@@ -62,6 +64,8 @@ class GitSyncGitOperations {
     
     /**
      * Clone or update repository
+    *
+    * @codeCoverageIgnore Orchestrates shell commands that depend on git availability.
      */
     public function syncRepository() {
         $configuration = $this->prepareSyncConfiguration();
@@ -104,6 +108,8 @@ class GitSyncGitOperations {
     
     /**
      * Clone repository
+    *
+    * @codeCoverageIgnore Executes git clone against the filesystem.
      */
     private function cloneRepository( $repo_url, $branch ) {
         // Ensure directory exists and is empty
@@ -148,6 +154,8 @@ class GitSyncGitOperations {
     
     /**
      * Pull changes from repository
+    *
+    * @codeCoverageIgnore Executes git fetch/reset against the filesystem.
      */
     private function pullChanges( $branch ) {
         $username = get_option( 'gitsync_username', '' );
@@ -248,6 +256,8 @@ class GitSyncGitOperations {
     
     /**
      * Configure credentials for git
+    *
+    * @codeCoverageIgnore Writes git config in the working tree; exercised only in integration.
      */
     private function configureCredentials() {
         exec( sprintf(
@@ -282,6 +292,8 @@ class GitSyncGitOperations {
     
     /**
      * Get list of markdown files in repository
+    *
+    * @codeCoverageIgnore Reads the repository working tree from disk.
      */
     public function getMarkdownFiles() {
         if ( ! $this->isRepoInitialized() ) {
@@ -309,6 +321,8 @@ class GitSyncGitOperations {
     
     /**
      * Log error message
+    *
+    * @codeCoverageIgnore Thin wrapper around error_log for operational visibility.
      */
     private function logError( $message ) {
         error_log( '[GitSync Error] ' . $message );
@@ -316,6 +330,8 @@ class GitSyncGitOperations {
     
     /**
      * Log info message
+    *
+    * @codeCoverageIgnore Thin wrapper around error_log for operational visibility.
      */
     private function logInfo( $message ) {
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {

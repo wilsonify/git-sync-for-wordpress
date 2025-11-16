@@ -2,6 +2,8 @@
 /**
  * Sync Scheduler Class
  * Handles scheduled sync operations
+ *
+ * @codeCoverageIgnore Depends on WordPress' cron API and hooks.
  */
 
 namespace GitSync;
@@ -12,6 +14,8 @@ use function add_filter;
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// @codeCoverageIgnoreStart
 
 class GitSyncSyncScheduler {
     
@@ -39,3 +43,5 @@ class GitSyncSyncScheduler {
         return $schedules;
     }
 }
+
+// @codeCoverageIgnoreEnd

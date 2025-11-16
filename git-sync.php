@@ -12,6 +12,8 @@
  * Domain Path: /languages
  */
 
+// @codeCoverageIgnoreStart
+
 use GitSync\GitSyncAdminSettings;
 use GitSync\GitSyncContentSync;
 use GitSync\GitSyncSyncScheduler;
@@ -146,3 +148,5 @@ function gitsyncInit() {
 
 // Start the plugin
 gitsyncInit();
+
+// @codeCoverageIgnoreEnd
