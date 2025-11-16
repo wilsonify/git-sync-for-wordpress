@@ -34,10 +34,8 @@ class GitSync_Git_Operations {
      * Check if git is available
      */
     public function is_git_available() {
-        $output = array();
-        $return_var = 0;
-        exec( 'git --version 2>&1', $output, $return_var );
-        return $return_var === 0;
+        $result = GitSync_Command_Runner::run( array( 'git', '--version' ) );
+        return true === $result['success'];
     }
     
     /**
@@ -98,22 +96,16 @@ class GitSync_Git_Operations {
             $repo_url = $this->add_credentials_to_url( $repo_url, $username, $token );
         }
         
-        $command = sprintf(
-            'cd %s && git clone -b %s %s . 2>&1',
-            escapeshellarg( $this->repo_path ),
-            escapeshellarg( $branch ),
-            escapeshellarg( $repo_url )
+        $result = GitSync_Command_Runner::run(
+            array( 'git', 'clone', '-b', $branch, $repo_url, '.' ),
+            $this->repo_path
         );
-        
-        $output = array();
-        $return_var = 0;
-        exec( $command, $output, $return_var );
 
-        if ( $return_var !== 0 ) {
-            $msg = implode( "\n", $output );
+        if ( true !== $result['success'] ) {
+            $msg = implode( "\n", $result['output'] );
             // Mask token if present before logging
             $this->log_error( 'Clone failed: ' . $this->mask_token_in_message( $msg, $token ) );
-            return new WP_Error( 'clone_failed', __( 'Failed to clone repository.', 'gitsync' ), $output );
+            return new WP_Error( 'clone_failed', __( 'Failed to clone repository.', 'gitsync' ), $result['output'] );
         }
         
         $this->log_info( 'Repository cloned successfully.' );
@@ -138,20 +130,22 @@ class GitSync_Git_Operations {
             $this->configure_credentials( $username, $token );
         }
 
-        $command = sprintf(
-            'cd %s && git fetch origin && git reset --hard origin/%s 2>&1',
-            escapeshellarg( $this->repo_path ),
-            escapeshellarg( $branch )
+        $fetch = GitSync_Command_Runner::run( array( 'git', 'fetch', 'origin' ), $this->repo_path );
+        if ( true !== $fetch['success'] ) {
+            $msg = implode( "\n", $fetch['output'] );
+            $this->log_error( 'Pull failed (fetch): ' . $this->mask_token_in_message( $msg, $token ) );
+            return new WP_Error( 'pull_failed', __( 'Failed to pull changes.', 'gitsync' ), $fetch['output'] );
+        }
+
+        $reset = GitSync_Command_Runner::run(
+            array( 'git', 'reset', '--hard', sprintf( 'origin/%s', $branch ) ),
+            $this->repo_path
         );
-        
-        $output = array();
-        $return_var = 0;
-        exec( $command, $output, $return_var );
-        
-        if ( $return_var !== 0 ) {
-            $msg = implode( "\n", $output );
-            $this->log_error( 'Pull failed: ' . $this->mask_token_in_message( $msg, $token ) );
-            return new WP_Error( 'pull_failed', __( 'Failed to pull changes.', 'gitsync' ), $output );
+
+        if ( true !== $reset['success'] ) {
+            $msg = implode( "\n", $reset['output'] );
+            $this->log_error( 'Pull failed (reset): ' . $this->mask_token_in_message( $msg, $token ) );
+            return new WP_Error( 'pull_failed', __( 'Failed to pull changes.', 'gitsync' ), $reset['output'] );
         }
         
         $this->log_info( 'Changes pulled successfully.' );
@@ -230,12 +224,12 @@ class GitSync_Git_Operations {
         $repo_url = get_option( 'gitsync_repo_url', '' );
         $auth_url = $this->add_credentials_to_url( $repo_url, $username, $token );
         
-        exec( sprintf(
-            'cd %s && git config credential.helper store 2>&1',
-            escapeshellarg( $this->repo_path )
-        ) );
+        GitSync_Command_Runner::run(
+            array( 'git', 'config', 'credential.helper', 'store' ),
+            $this->repo_path
+        );
     }
-    
+
     /**
      * Get list of markdown files in repository
      */
