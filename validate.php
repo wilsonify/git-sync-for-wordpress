@@ -8,6 +8,19 @@
 echo "GitSync Plugin Validation\n";
 echo "==========================\n\n";
 
+if ( ! defined( 'GITSYNC_CLI' ) ) {
+    define( 'GITSYNC_CLI', true );
+}
+
+$autoload_path = __DIR__ . '/vendor/autoload.php';
+if ( ! file_exists( $autoload_path ) ) {
+    echo "❌ Error: Composer dependencies missing. Run 'composer install' first.\n";
+    exit( 1 );
+}
+
+require_once $autoload_path;
+require_once __DIR__ . '/includes/class-command-runner.php';
+
 $errors = 0;
 $warnings = 0;
 $checks = 0;
@@ -43,16 +56,21 @@ function check_php_syntax( $path ) {
     global $errors, $checks;
     $checks++;
     
-    $output = array();
-    $return_var = 0;
-    exec( "php -l " . escapeshellarg( $path ) . " 2>&1", $output, $return_var );
+    $full_path = realpath( $path );
+    if ( false === $full_path ) {
+        echo "❌ PHP syntax check skipped (file missing): $path\n";
+        $errors++;
+        return false;
+    }
+
+    $result = GitSync_Command_Runner::run( array( PHP_BINARY, '-l', $full_path ) );
     
-    if ( $return_var === 0 ) {
+    if ( true === $result['success'] ) {
         echo "✅ Valid PHP syntax: $path\n";
         return true;
     } else {
         echo "❌ PHP syntax error in: $path\n";
-        echo "   " . implode( "\n   ", $output ) . "\n";
+        echo "   " . implode( "\n   ", $result['output'] ) . "\n";
         $errors++;
         return false;
     }

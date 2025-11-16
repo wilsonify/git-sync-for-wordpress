@@ -6,6 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     define( 'ABSPATH', __DIR__ . '/../' );
 }
 
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../includes/class-command-runner.php';
+
 // Minimal WP functions used by the plugin classes (sufficient for unit tests)
 function wp_upload_dir() {
     return array( 'basedir' => sys_get_temp_dir() );
