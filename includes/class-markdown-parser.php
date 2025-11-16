@@ -4,6 +4,12 @@
  * Parses Markdown files and extracts content and metadata
  */
 
+namespace GitSync;
+
+use WP_Error;
+use function __;
+use function sanitize_title;
+
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
@@ -129,9 +135,9 @@ class GitSyncMarkdownParser {
         $html = preg_replace( '/`(.+?)`/', '<code>$1</code>', $html );
         
         // Lists - Unordered
-        $html = preg_replace_callback( '/^(\*|\-)\s+(.+)$/m', function( $matches ) {
+        $html = preg_replace_callback( '/^[-*]\s+(.+)$/m', function( $matches ) {
             static $in_list = false;
-            $item = '<li>' . $matches[2] . '</li>';
+            $item = '<li>' . $matches[1] . '</li>';
             if ( ! $in_list ) {
                 $in_list = true;
                 return '<ul>' . $item;
@@ -168,26 +174,23 @@ class GitSyncMarkdownParser {
      * Determine content type from metadata or file path
      */
     private function determineContentType( $metadata, $file_path ) {
-        // Check metadata for explicit type
-        if ( isset( $metadata['type'] ) ) {
-            $type = strtolower( $metadata['type'] );
-            if ( in_array( $type, array( 'post', 'page', 'product' ) ) ) {
-                return $type;
-            }
+        $candidate = isset( $metadata['type'] ) ? strtolower( $metadata['type'] ) : '';
+        if ( in_array( $candidate, array( 'post', 'page', 'product' ), true ) ) {
+            return $candidate;
         }
-        
-        // Check file path for type indicators
+
         $path_lower = strtolower( $file_path );
-        if ( strpos( $path_lower, '/posts/' ) !== false || strpos( $path_lower, '/blog/' ) !== false ) {
-            return 'post';
-        } elseif ( strpos( $path_lower, '/products/' ) !== false ) {
-            return 'product';
+        $type = 'post';
+
+        if ( strpos( $path_lower, '/products/' ) !== false ) {
+            $type = 'product';
         } elseif ( strpos( $path_lower, '/pages/' ) !== false ) {
-            return 'page';
+            $type = 'page';
+        } elseif ( strpos( $path_lower, '/posts/' ) !== false || strpos( $path_lower, '/blog/' ) !== false ) {
+            $type = 'post';
         }
-        
-        // Default to post
-        return 'post';
+
+        return $type;
     }
     
     /**

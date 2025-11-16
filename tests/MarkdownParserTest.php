@@ -1,4 +1,6 @@
 <?php
+
+use GitSync\GitSyncMarkdownParser;
 use PHPUnit\Framework\TestCase;
 
 

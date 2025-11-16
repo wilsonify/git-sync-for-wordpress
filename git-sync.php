@@ -12,6 +12,10 @@
  * Domain Path: /languages
  */
 
+use GitSync\GitSyncAdminSettings;
+use GitSync\GitSyncContentSync;
+use GitSync\GitSyncSyncScheduler;
+
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -23,6 +27,9 @@ define( 'GITSYNC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GITSYNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GITSYNC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
+require_once GITSYNC_PLUGIN_DIR . 'vendor/autoload.php';
+require_once GITSYNC_PLUGIN_DIR . 'includes/autoload.php';
+
 /**
  * Main GitSync Class
  */
@@ -32,6 +39,9 @@ class GitSync {
      * Instance of this class
      */
     private static $instance = null;
+
+	/** @var GitSyncSyncScheduler */
+	private $scheduler;
     
     /**
      * Get instance of the class
@@ -47,19 +57,8 @@ class GitSync {
      * Constructor
      */
     private function __construct() {
-        $this->includes();
+        $this->scheduler = new GitSyncSyncScheduler();
         $this->init_hooks();
-    }
-    
-    /**
-     * Include required files
-     */
-    private function includes() {
-        require_once GITSYNC_PLUGIN_DIR . 'includes/class-git-operations.php';
-        require_once GITSYNC_PLUGIN_DIR . 'includes/class-markdown-parser.php';
-        require_once GITSYNC_PLUGIN_DIR . 'includes/class-content-sync.php';
-        require_once GITSYNC_PLUGIN_DIR . 'includes/class-admin-settings.php';
-        require_once GITSYNC_PLUGIN_DIR . 'includes/class-sync-scheduler.php';
     }
     
     /**
@@ -70,15 +69,15 @@ class GitSync {
         register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
         
         add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-        add_action( 'admin_menu', array( 'GitSync_Admin_Settings', 'add_admin_menu' ) );
-        add_action( 'admin_init', array( 'GitSync_Admin_Settings', 'register_settings' ) );
+        add_action( 'admin_menu', array( GitSyncAdminSettings::class, 'addAdminMenu' ) );
+        add_action( 'admin_init', array( GitSyncAdminSettings::class, 'registerSettings' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
         
         // AJAX hooks for sync actions
-        add_action( 'wp_ajax_gitsync_manual_sync', array( 'GitSync_Content_Sync', 'manual_sync' ) );
+        add_action( 'wp_ajax_gitsync_manual_sync', array( GitSyncContentSync::class, 'manualSync' ) );
         
         // Scheduled sync
-        add_action( 'gitsync_scheduled_sync', array( 'GitSync_Content_Sync', 'scheduled_sync' ) );
+        add_action( 'gitsync_scheduled_sync', array( GitSyncContentSync::class, 'scheduledSync' ) );
     }
     
     /**

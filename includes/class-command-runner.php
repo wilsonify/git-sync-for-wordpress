@@ -3,6 +3,8 @@
  * Lightweight command runner that delegates to Symfony's Process component.
  */
 
+namespace GitSync;
+
 use Symfony\Component\Process\Process;
 
 if ( ! defined( 'ABSPATH' ) && ! defined( 'GITSYNC_CLI' ) ) {

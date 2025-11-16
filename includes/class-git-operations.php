@@ -4,6 +4,16 @@
  * Handles all Git operations for the plugin
  */
 
+namespace GitSync;
+
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use WP_Error;
+use function __;
+use function get_option;
+use function wp_mkdir_p;
+use function wp_upload_dir;
+
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
@@ -18,9 +28,13 @@ class GitSyncGitOperations {
     /**
      * Constructor
      */
-    public function __construct() {
-    $upload_dir = wp_upload_dir();
-    $this->repoPath = $upload_dir['basedir'] . '/gitsync-repo';
+    public function __construct( $repoPath = null ) {
+	$this->repoPath = $repoPath ? rtrim( $repoPath, '/' ) : $this->determineDefaultRepoPath();
+    }
+    
+    private function determineDefaultRepoPath() {
+	$upload_dir = wp_upload_dir();
+	return rtrim( $upload_dir['basedir'], '/' ) . '/gitsync-repo';
     }
     
     /**
@@ -28,6 +42,12 @@ class GitSyncGitOperations {
      */
     public function getRepoPath() {
         return $this->repoPath;
+    }
+
+    public function setRepoPath( $path ) {
+	if ( ! empty( $path ) ) {
+	    $this->repoPath = rtrim( $path, '/' );
+	}
     }
     
     /**
@@ -44,30 +64,42 @@ class GitSyncGitOperations {
      * Clone or update repository
      */
     public function syncRepository() {
-        $repo_url = get_option( 'gitsync_repo_url', '' );
-        $branch = get_option( 'gitsync_branch', 'main' );
-        
-        if ( empty( $repo_url ) ) {
-            return new WP_Error( 'no_repo_url', __( 'Repository URL is not configured.', 'gitsync' ) );
+        $configuration = $this->prepareSyncConfiguration();
+        if ( $configuration instanceof WP_Error ) {
+            return $configuration;
         }
-        
-        if ( ! $this->isGitAvailable() ) {
-            return new WP_Error( 'git_not_available', __( 'Git is not available on this server.', 'gitsync' ) );
-        }
-        
-        // Check if repository already exists
-        if ( $this->isRepoInitialized() ) {
-            return $this->pullChanges( $branch );
-        } else {
-            return $this->cloneRepository( $repo_url, $branch );
-        }
+
+        $repo_url = $configuration['repo_url'];
+        $branch = $configuration['branch'];
+
+        return $this->isRepoInitialized()
+            ? $this->pullChanges( $branch )
+            : $this->cloneRepository( $repo_url, $branch );
+    }
+
+    private function prepareSyncConfiguration() {
+	$repo_url = get_option( 'gitsync_repo_url', '' );
+	$branch = get_option( 'gitsync_branch', 'main' );
+
+	if ( empty( $repo_url ) ) {
+	    return new WP_Error( 'no_repo_url', __( 'Repository URL is not configured.', 'gitsync' ) );
+	}
+
+	if ( ! $this->isGitAvailable() ) {
+	    return new WP_Error( 'git_not_available', __( 'Git is not available on this server.', 'gitsync' ) );
+	}
+
+	return array(
+	    'repo_url' => $repo_url,
+	    'branch' => $branch,
+	);
     }
     
     /**
      * Check if repository is initialized
      */
     private function isRepoInitialized() {
-    return file_exists( $this->repoPath . '/.git' );
+	return file_exists( $this->repoPath . '/.git' );
     }
     
     /**
@@ -193,17 +225,10 @@ class GitSyncGitOperations {
 
         $scheme = isset( $parsed['scheme'] ) ? $parsed['scheme'] : '';
         $allowed = array( 'https', 'http', 'git', 'ssh' );
-        // Also allow scp-like git@host:repo.git forms (no scheme) - keep basic check
-        if ( in_array( $scheme, $allowed, true ) ) {
-            return true;
-        }
+        $accepted = in_array( $scheme, $allowed, true );
+        $looks_like_scp = ! $scheme && strpos( $url, '@' ) !== false && strpos( $url, ':' ) !== false;
 
-        // If no scheme but contains @ and ':' it's likely an scp-style URL (git@github.com:owner/repo.git)
-        if ( strpos( $url, '@' ) !== false && strpos( $url, ':' ) !== false ) {
-            return true;
-        }
-
-        return false;
+        return $accepted || $looks_like_scp;
     }
 
     /**
@@ -220,9 +245,6 @@ class GitSyncGitOperations {
      * Configure credentials for git
      */
     private function configureCredentials( $username, $token ) {
-    $repo_url = get_option( 'gitsync_repo_url', '' );
-    $auth_url = $this->addCredentialsToUrl( $repo_url, $username, $token );
-        
         exec( sprintf(
             'cd %s && git config credential.helper store 2>&1',
             escapeshellarg( $this->repoPath )

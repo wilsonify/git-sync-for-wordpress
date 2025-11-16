@@ -4,6 +4,23 @@
  * Handles admin settings page and configuration
  */
 
+namespace GitSync;
+
+use function __;
+use function _e;
+use function add_menu_page;
+use function add_settings_field;
+use function add_settings_section;
+use function checked;
+use function current_user_can;
+use function do_settings_sections;
+use function esc_attr;
+use function esc_html;
+use function get_admin_page_title;
+use function register_setting;
+use function settings_fields;
+use function submit_button;
+
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
@@ -19,7 +36,7 @@ class GitSyncAdminSettings {
             __( 'GitSync', 'gitsync' ),
             'manage_options',
             'gitsync-settings',
-            array( __CLASS__, 'render_settings_page' ),
+            array( __CLASS__, 'renderSettingsPage' ),
             'dashicons-update',
             100
         );
@@ -60,14 +77,14 @@ class GitSyncAdminSettings {
         add_settings_section(
             'gitsync_repo_section',
             __( 'Repository Settings', 'gitsync' ),
-            array( __CLASS__, 'render_repo_section' ),
+            array( __CLASS__, 'renderRepoSection' ),
             'gitsync-settings'
         );
         
         add_settings_section(
             'gitsync_sync_section',
             __( 'Sync Settings', 'gitsync' ),
-            array( __CLASS__, 'render_sync_section' ),
+            array( __CLASS__, 'renderSyncSection' ),
             'gitsync-settings'
         );
         
@@ -75,7 +92,7 @@ class GitSyncAdminSettings {
         add_settings_field(
             'gitsync_repo_url',
             __( 'Repository URL', 'gitsync' ),
-            array( __CLASS__, 'render_repo_url_field' ),
+            array( __CLASS__, 'renderRepoUrlField' ),
             'gitsync-settings',
             'gitsync_repo_section'
         );
@@ -83,7 +100,7 @@ class GitSyncAdminSettings {
         add_settings_field(
             'gitsync_branch',
             __( 'Branch', 'gitsync' ),
-            array( __CLASS__, 'render_branch_field' ),
+            array( __CLASS__, 'renderBranchField' ),
             'gitsync-settings',
             'gitsync_repo_section'
         );
@@ -91,7 +108,7 @@ class GitSyncAdminSettings {
         add_settings_field(
             'gitsync_username',
             __( 'Username', 'gitsync' ),
-            array( __CLASS__, 'render_username_field' ),
+            array( __CLASS__, 'renderUsernameField' ),
             'gitsync-settings',
             'gitsync_repo_section'
         );
@@ -99,7 +116,7 @@ class GitSyncAdminSettings {
         add_settings_field(
             'gitsync_token',
             __( 'Access Token', 'gitsync' ),
-            array( __CLASS__, 'render_token_field' ),
+            array( __CLASS__, 'renderTokenField' ),
             'gitsync-settings',
             'gitsync_repo_section'
         );
@@ -107,7 +124,7 @@ class GitSyncAdminSettings {
         add_settings_field(
             'gitsync_auto_sync',
             __( 'Auto Sync', 'gitsync' ),
-            array( __CLASS__, 'render_auto_sync_field' ),
+            array( __CLASS__, 'renderAutoSyncField' ),
             'gitsync-settings',
             'gitsync_sync_section'
         );

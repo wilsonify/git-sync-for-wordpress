@@ -6,6 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     define( 'ABSPATH', __DIR__ . '/../' );
 }
 
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../includes/autoload.php';
+
 // Minimal WP functions used by the plugin classes (sufficient for unit tests)
 function wp_upload_dir() {
     return array( 'basedir' => sys_get_temp_dir() );
@@ -21,7 +24,12 @@ function sanitize_title( $title ) {
 
 function sanitize_text_field( $value ) { return trim( (string) $value ); }
 function esc_url_raw( $url ) { return $url; }
-function __ ( $text, $domain = null ) { return $text; }
+function __ ( $text, $domain = null ) {
+    if ( null !== $domain ) {
+        // domain parameter kept for signature parity with WordPress
+    }
+	return $text;
+}
 
 // Minimal WP_Error implementation for tests
 class WP_Error {
@@ -43,7 +51,3 @@ class WP_Error {
         return $this->data;
     }
 }
-
-// Require plugin source files we will test
-require_once __DIR__ . '/../includes/class-markdown-parser.php';
-require_once __DIR__ . '/../includes/class-git-operations.php';

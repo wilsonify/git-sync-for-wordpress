@@ -12,6 +12,29 @@ $errors = 0;
 $warnings = 0;
 $checks = 0;
 
+const GITSYNC_INCLUDE_CLASS_MAP = array(
+    'git_operations' => array(
+        'path' => 'includes/class-git-operations.php',
+        'class' => 'GitSyncGitOperations',
+    ),
+    'markdown_parser' => array(
+        'path' => 'includes/class-markdown-parser.php',
+        'class' => 'GitSyncMarkdownParser',
+    ),
+    'content_sync' => array(
+        'path' => 'includes/class-content-sync.php',
+        'class' => 'GitSyncContentSync',
+    ),
+    'admin_settings' => array(
+        'path' => 'includes/class-admin-settings.php',
+        'class' => 'GitSyncAdminSettings',
+    ),
+    'sync_scheduler' => array(
+        'path' => 'includes/class-sync-scheduler.php',
+        'class' => 'GitSyncSyncScheduler',
+    ),
+);
+
 // Check if we're in the right directory
 if ( ! file_exists( 'git-sync.php' ) ) {
     echo "❌ Error: Must be run from plugin root directory\n";
@@ -98,11 +121,9 @@ echo "\n";
 
 echo "Checking include files...\n";
 echo "-------------------------\n";
-check_file( 'includes/class-git-operations.php', true );
-check_file( 'includes/class-markdown-parser.php', true );
-check_file( 'includes/class-content-sync.php', true );
-check_file( 'includes/class-admin-settings.php', true );
-check_file( 'includes/class-sync-scheduler.php', true );
+foreach ( GITSYNC_INCLUDE_CLASS_MAP as $include ) {
+    check_file( $include['path'], true );
+}
 echo "\n";
 
 echo "Checking asset files...\n";
@@ -114,21 +135,17 @@ echo "\n";
 echo "Checking PHP syntax...\n";
 echo "----------------------\n";
 check_php_syntax( 'git-sync.php' );
-check_php_syntax( 'includes/class-git-operations.php' );
-check_php_syntax( 'includes/class-markdown-parser.php' );
-check_php_syntax( 'includes/class-content-sync.php' );
-check_php_syntax( 'includes/class-admin-settings.php' );
-check_php_syntax( 'includes/class-sync-scheduler.php' );
+foreach ( GITSYNC_INCLUDE_CLASS_MAP as $include ) {
+    check_php_syntax( $include['path'] );
+}
 echo "\n";
 
 echo "Checking classes...\n";
 echo "-------------------\n";
 check_class_exists( 'git-sync.php', 'GitSync' );
-check_class_exists( 'includes/class-git-operations.php', 'GitSync_Git_Operations' );
-check_class_exists( 'includes/class-markdown-parser.php', 'GitSync_Markdown_Parser' );
-check_class_exists( 'includes/class-content-sync.php', 'GitSync_Content_Sync' );
-check_class_exists( 'includes/class-admin-settings.php', 'GitSync_Admin_Settings' );
-check_class_exists( 'includes/class-sync-scheduler.php', 'GitSync_Sync_Scheduler' );
+foreach ( GITSYNC_INCLUDE_CLASS_MAP as $include ) {
+    check_class_exists( $include['path'], $include['class'] );
+}
 echo "\n";
 
 echo "Checking example files...\n";

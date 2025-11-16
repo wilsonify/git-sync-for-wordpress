@@ -1,4 +1,6 @@
 <?php
+
+use GitSync\GitSyncGitOperations;
 use PHPUnit\Framework\TestCase;
 
 class GitOperationsTest extends TestCase {
@@ -35,13 +37,7 @@ class GitOperationsTest extends TestCase {
     }
 
     public function test_get_markdown_files_returns_only_md_and_markdown_files() {
-    $gitOps = new GitSyncGitOperations();
-
-        // Override private repo_path
-        $ref = new ReflectionClass( $gitOps );
-        $prop = $ref->getProperty( 'repoPath' );
-        $prop->setAccessible( true );
-        $prop->setValue( $gitOps, $this->tempDir );
+    $gitOps = new GitSyncGitOperations( $this->tempDir );
 
     $files = $gitOps->getMarkdownFiles();
         $this->assertIsArray( $files );
