@@ -29,12 +29,12 @@ class GitSyncGitOperations {
      * Constructor
      */
     public function __construct( $repoPath = null ) {
-	$this->repoPath = $repoPath ? rtrim( $repoPath, '/' ) : $this->determineDefaultRepoPath();
+        $this->repoPath = $repoPath ? rtrim( $repoPath, '/' ) : $this->determineDefaultRepoPath();
     }
     
     private function determineDefaultRepoPath() {
-	$upload_dir = wp_upload_dir();
-	return rtrim( $upload_dir['basedir'], '/' ) . '/gitsync-repo';
+        $upload_dir = wp_upload_dir();
+        return rtrim( $upload_dir['basedir'], '/' ) . '/gitsync-repo';
     }
     
     /**
@@ -45,9 +45,9 @@ class GitSyncGitOperations {
     }
 
     public function setRepoPath( $path ) {
-	if ( ! empty( $path ) ) {
-	    $this->repoPath = rtrim( $path, '/' );
-	}
+        if ( ! empty( $path ) ) {
+            $this->repoPath = rtrim( $path, '/' );
+        }
     }
     
     /**
@@ -78,28 +78,28 @@ class GitSyncGitOperations {
     }
 
     private function prepareSyncConfiguration() {
-	$repo_url = get_option( 'gitsync_repo_url', '' );
-	$branch = get_option( 'gitsync_branch', 'main' );
+        $repo_url = get_option( 'gitsync_repo_url', '' );
+        $branch = get_option( 'gitsync_branch', 'main' );
 
-	if ( empty( $repo_url ) ) {
-	    return new WP_Error( 'no_repo_url', __( 'Repository URL is not configured.', 'gitsync' ) );
-	}
+        if ( empty( $repo_url ) ) {
+            return new WP_Error( 'no_repo_url', __( 'Repository URL is not configured.', 'gitsync' ) );
+        }
 
-	if ( ! $this->isGitAvailable() ) {
-	    return new WP_Error( 'git_not_available', __( 'Git is not available on this server.', 'gitsync' ) );
-	}
+        if ( ! $this->isGitAvailable() ) {
+            return new WP_Error( 'git_not_available', __( 'Git is not available on this server.', 'gitsync' ) );
+        }
 
-	return array(
-	    'repo_url' => $repo_url,
-	    'branch' => $branch,
-	);
+        return array(
+            'repo_url' => $repo_url,
+            'branch' => $branch,
+        );
     }
     
     /**
      * Check if repository is initialized
      */
     private function isRepoInitialized() {
-	return file_exists( $this->repoPath . '/.git' );
+        return file_exists( $this->repoPath . '/.git' );
     }
     
     /**
