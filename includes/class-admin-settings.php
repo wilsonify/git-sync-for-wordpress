@@ -225,7 +225,8 @@ Your content here...</pre>
     public static function renderRepoUrlField() {
         $value = get_option( 'gitsync_repo_url', '' );
         ?>
-        <input type="url" name="gitsync_repo_url" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
+        <label for="gitsync_repo_url"><?php _e( 'Repository URL', 'gitsync' ); ?></label><br />
+        <input id="gitsync_repo_url" type="url" name="gitsync_repo_url" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
         <p class="description">
             <?php _e( 'The HTTPS URL of your Git repository (e.g., https://github.com/username/repo.git)', 'gitsync' ); ?>
         </p>
@@ -238,7 +239,8 @@ Your content here...</pre>
     public static function renderBranchField() {
         $value = get_option( 'gitsync_branch', 'main' );
         ?>
-        <input type="text" name="gitsync_branch" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
+        <label for="gitsync_branch"><?php _e( 'Branch', 'gitsync' ); ?></label><br />
+        <input id="gitsync_branch" type="text" name="gitsync_branch" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
         <p class="description">
             <?php _e( 'The branch to sync (default: main)', 'gitsync' ); ?>
         </p>
@@ -251,7 +253,8 @@ Your content here...</pre>
     public static function renderUsernameField() {
         $value = get_option( 'gitsync_username', '' );
         ?>
-        <input type="text" name="gitsync_username" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
+        <label for="gitsync_username"><?php _e( 'Git Username', 'gitsync' ); ?></label><br />
+        <input id="gitsync_username" type="text" name="gitsync_username" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
         <p class="description">
             <?php _e( 'Git username (required for private repositories)', 'gitsync' ); ?>
         </p>
@@ -264,7 +267,8 @@ Your content here...</pre>
     public static function renderTokenField() {
         $value = get_option( 'gitsync_token', '' );
         ?>
-        <input type="password" name="gitsync_token" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
+        <label for="gitsync_token"><?php _e( 'Access Token', 'gitsync' ); ?></label><br />
+        <input id="gitsync_token" type="password" name="gitsync_token" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
         <p class="description">
             <?php _e( 'Personal access token or password (required for private repositories)', 'gitsync' ); ?>
         </p>
