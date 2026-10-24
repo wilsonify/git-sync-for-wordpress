@@ -5,6 +5,42 @@
 (function($) {
     'use strict';
 
+    /**
+     * Format success message
+     */
+    function formatSuccessMessage(data) {
+        var message = '<strong>' + gitsyncAdmin.strings.sync_complete + '</strong>';
+        
+        if (data.data) {
+            message += '<br><br>';
+            message += 'Processed: ' + data.data.processed + '<br>';
+            message += 'Created: ' + data.data.created + '<br>';
+            message += 'Updated: ' + data.data.updated + '<br>';
+            message += 'Skipped: ' + data.data.skipped + '<br>';
+            message += 'Errors: ' + data.data.errors;
+        }
+        
+        return message;
+    }
+    
+    /**
+     * Format error message
+     */
+    function formatErrorMessage(data) {
+        var message = '<strong>' + gitsyncAdmin.strings.sync_error + '</strong>';
+        
+        if (data.message) {
+            message += '<br>' + data.message;
+        }
+        
+        if (data.data && Array.isArray(data.data)) {
+            message += '<br><br><em>Details:</em><br>';
+            message += data.data.join('<br>');
+        }
+        
+        return message;
+    }
+
     $(document).ready(function() {
         // Manual sync button handler
         $('#gitsync-manual-sync').on('click', function(e) {
@@ -53,42 +89,6 @@
                 }
             });
         });
-        
-        /**
-         * Format success message
-         */
-        function formatSuccessMessage(data) {
-            var message = '<strong>' + gitsyncAdmin.strings.sync_complete + '</strong>';
-            
-            if (data.data) {
-                message += '<br><br>';
-                message += 'Processed: ' + data.data.processed + '<br>';
-                message += 'Created: ' + data.data.created + '<br>';
-                message += 'Updated: ' + data.data.updated + '<br>';
-                message += 'Skipped: ' + data.data.skipped + '<br>';
-                message += 'Errors: ' + data.data.errors;
-            }
-            
-            return message;
-        }
-        
-        /**
-         * Format error message
-         */
-        function formatErrorMessage(data) {
-            var message = '<strong>' + gitsyncAdmin.strings.sync_error + '</strong>';
-            
-            if (data.message) {
-                message += '<br>' + data.message;
-            }
-            
-            if (data.data && Array.isArray(data.data)) {
-                message += '<br><br><em>Details:</em><br>';
-                message += data.data.join('<br>');
-            }
-            
-            return message;
-        }
     });
 
 })(jQuery);
